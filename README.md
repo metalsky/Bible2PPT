@@ -85,16 +85,35 @@
 * **오프라인 캐시**: **성경 구절**을 한번 내려받으면 인터넷 연결 없이 PPT를 만들 수 있습니다.
 * **장별로 PPT 나누기**: `책 이름/장 번호.pptx`의 구조로 장별로 PPT를 만들어 저장합니다.
 
+## 신규 기능
+
+* **테마 선택**: 설정 메뉴에서 다크/라이트 테마를 아이콘으로 선택합니다 (다크=달, 라이트=해).
+* **DB 편집기**: 좌측 메뉴의 DB 아이콘(PPT 제작 기록 아래)으로 이동합니다. 번역/책/장/절 트리 탐색, 선택 구절 편집, 다른 이름으로 저장, 복원, 리비전/버전 관리, 잘못된 DB 읽기 방지.
+* **생성 파일·DB 정보 표시**: 설정 메뉴에서 DB 파일명·크기, 리비전·저장시간과 템플릿 파일명·크기를 표시합니다.
+* **오프라인 저장 버튼**: 글자가 잘리지 않도록 높이를 확보했습니다.
+
+## 참고 문서
+
+* [기능 명세서](docs/기능_명세서.md)
+* [작업 이력](docs/작업_이력.md)
+* [개선안 (유사 프로젝트 비교, 미비·개선점, 남은 항목)](docs/개선_안.md)
+
+---
 
 ## 설치 방법
 
-**성경2PPT**는 [실행 요구 사항](#실행-요구-사항)만 만족하면 설치 없이 사용할 수 있습니다. [Releases](https://github.com/sunghwan2789/Bible2PPT/releases) 페이지에서 최신 버전을 내려받고 바로 사용하세요!
+**성경2PPT**는 [실행 요구 사항](#실행-요구-사항)만 만족하면 설치 없이 사용할 수 있습니다. [Releases](https://github.com/metalsky/Bible2PPT/releases) 페이지에서 최신 버전을 내려받고 바로 사용하세요!
+
+> 참고: 이 리포지토리는 원본 [`sunghwan2789/Bible2PPT`](https://github.com/sunghwan2789/Bible2PPT) 기반의 포크이며,
+> **2.1.0-dev 작업** (갓피아 검색 보완, DB 편집기, 테마, 문서화)은
+> **`metalsky/Bible2PPT`**에서 GitHub API 기반 버전관리(태그/릴리스)되고 있습니다.
 
 
 ## 실행 요구 사항
 
-### .NET Framework 4.8
-**성경2PPT**를 실행하는 데 필요한 프레임워크입니다. [여기](http://go.microsoft.com/fwlink/?LinkId=2085155)에서 내려받아서 설치하세요.
+### .NET 8.0
+**성경2PPT**를 실행하는 데 필요한 프레임워크입니다. [.NET 8](https://dotnet.microsoft.com/download)에서 내려받아 설치하세요.
+(2.1.0-dev는 이전 버전의 .NET Framework 4.8이 아닌 **.NET 8.0-windows**를 요구합니다.)
 
 ### Microsoft PowerPoint 2007 이상
 PPT를 만들고 보는 데 필요한 프로그램입니다. 프로그램 구성 요소로 *Office 공유 기능* - *Visual Basic for Applications*를 설치해야 합니다.
@@ -104,7 +123,8 @@ PPT를 만들고 보는 데 필요한 프로그램입니다. 프로그램 구성
 
 
 ## 기여 방법
-**성경2PPT**는 당신의 기여를 기다리고 있습니다~ 사용 중 발생한 오류 혹은 추가하고 싶은 기능을 [Issues](https://github.com/sunghwan2789/Bible2PPT/issues) 페이지에 올려주세요!
+**성경2PPT**는 당신의 기여를 기다리고 있습니다~ 사용 중 발생한 오류 혹은 추가하고 싶은 기능을
+[Issues](https://github.com/metalsky/Bible2PPT/issues) 페이지에 올려주세요!
 
 
 ## License

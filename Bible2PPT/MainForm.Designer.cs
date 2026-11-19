@@ -35,7 +35,6 @@
             System.Windows.Forms.TableLayoutPanel numberOfVerseLinesPerSlideTableLayoutPanel;
             System.Windows.Forms.Label numberOfVerseLinesPerSlideLabel;
             System.Windows.Forms.TableLayoutPanel biblesTableLayoutPanel;
-            System.Windows.Forms.TableLayoutPanel biblesButtonTableLayoutPanel;
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.TableLayoutPanel bibleTableLayoutPanel;
@@ -67,6 +66,7 @@
             this.buildNavButton = new FontAwesome.Sharp.IconButton();
             this.historyNavButton = new FontAwesome.Sharp.IconButton();
             this.templatesNavButton = new FontAwesome.Sharp.IconButton();
+            this.dbNavButton = new FontAwesome.Sharp.IconButton();
             this.builderToolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.builderToolStripProgressBar = new System.Windows.Forms.ToolStripProgressBar();
             this.mainMultiPanel = new Bible2PPT.Controls.MultiPanel();
@@ -107,6 +107,7 @@
             this.autoOpenCheckBox = new System.Windows.Forms.CheckBox();
             this.templatesMultiPanelPage = new Bible2PPT.Controls.MultiPanelPage();
             this.settingsMultiPanelPage = new Bible2PPT.Controls.MultiPanelPage();
+            this.dbMultiPanelPage = new Bible2PPT.Controls.MultiPanelPage();
             this.updateButton = new System.Windows.Forms.Button();
             this.cleanCacheButton = new System.Windows.Forms.Button();
             this.settingsNavButton = new FontAwesome.Sharp.IconButton();
@@ -205,6 +206,7 @@
             navTopFlowLayoutPanel.BackColor = System.Drawing.SystemColors.MenuBar;
             navTopFlowLayoutPanel.Controls.Add(this.buildNavButton);
             navTopFlowLayoutPanel.Controls.Add(this.historyNavButton);
+            navTopFlowLayoutPanel.Controls.Add(this.dbNavButton);
             navTopFlowLayoutPanel.Controls.Add(this.templatesNavButton);
             navTopFlowLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             navTopFlowLayoutPanel.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
@@ -267,7 +269,7 @@
             this.templatesNavButton.IconColor = System.Drawing.SystemColors.MenuText;
             this.templatesNavButton.IconFont = FontAwesome.Sharp.IconFont.Auto;
             this.templatesNavButton.IconSize = 36;
-            this.templatesNavButton.Location = new System.Drawing.Point(0, 96);
+            this.templatesNavButton.Location = new System.Drawing.Point(0, 144);
             this.templatesNavButton.Margin = new System.Windows.Forms.Padding(0);
             this.templatesNavButton.Name = "templatesNavButton";
             this.templatesNavButton.Padding = new System.Windows.Forms.Padding(0, 4, 0, 0);
@@ -277,6 +279,27 @@
             this.templatesNavButton.UseVisualStyleBackColor = false;
             this.templatesNavButton.Visible = false;
             this.templatesNavButton.Click += new System.EventHandler(this.Nav_Click);
+            // 
+            // dbNavButton
+            // 
+            this.dbNavButton.BackColor = System.Drawing.SystemColors.Menu;
+            this.dbNavButton.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.dbNavButton.FlatAppearance.BorderSize = 0;
+            this.dbNavButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.dbNavButton.ForeColor = System.Drawing.SystemColors.MenuText;
+            this.dbNavButton.IconChar = FontAwesome.Sharp.IconChar.Database;
+            this.dbNavButton.IconColor = System.Drawing.SystemColors.MenuText;
+            this.dbNavButton.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            this.dbNavButton.IconSize = 36;
+            this.dbNavButton.Location = new System.Drawing.Point(0, 96);
+            this.dbNavButton.Margin = new System.Windows.Forms.Padding(0);
+            this.dbNavButton.Name = "dbNavButton";
+            this.dbNavButton.Padding = new System.Windows.Forms.Padding(0, 4, 0, 0);
+            this.dbNavButton.Size = new System.Drawing.Size(48, 48);
+            this.dbNavButton.TabIndex = 4;
+            this.toolTip.SetToolTip(this.dbNavButton, "DB");
+            this.dbNavButton.UseVisualStyleBackColor = false;
+            this.dbNavButton.Click += new System.EventHandler(this.Nav_Click);
             // 
             // builderStatusStrip
             // 
@@ -311,6 +334,7 @@
             this.mainMultiPanel.Controls.Add(this.historyMultiPanelPage);
             this.mainMultiPanel.Controls.Add(this.templatesMultiPanelPage);
             this.mainMultiPanel.Controls.Add(this.settingsMultiPanelPage);
+            this.mainMultiPanel.Controls.Add(this.dbMultiPanelPage);
             this.mainMultiPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.mainMultiPanel.Location = new System.Drawing.Point(48, 0);
             this.mainMultiPanel.Margin = new System.Windows.Forms.Padding(0);
@@ -1279,6 +1303,15 @@
             this.settingsMultiPanelPage.TabIndex = 0;
             this.settingsMultiPanelPage.Text = "설정";
             // 
+            // dbMultiPanelPage
+            // 
+            this.dbMultiPanelPage.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dbMultiPanelPage.Location = new System.Drawing.Point(0, 0);
+            this.dbMultiPanelPage.Name = "dbMultiPanelPage";
+            this.dbMultiPanelPage.Size = new System.Drawing.Size(461, 312);
+            this.dbMultiPanelPage.TabIndex = 0;
+            this.dbMultiPanelPage.Text = "DB";
+            // 
             // updateButton
             // 
             this.updateButton.Location = new System.Drawing.Point(25, 72);
@@ -1340,7 +1373,7 @@
             this.ClientSize = new System.Drawing.Size(509, 335);
             this.Controls.Add(mainTableLayoutPanel);
             this.Name = "MainForm";
-            this.Text = "성경2PPT";
+            this.Text = "성경2PPT (by Metalsky)";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             mainTableLayoutPanel.ResumeLayout(false);
             mainTableLayoutPanel.PerformLayout();
@@ -1417,12 +1450,15 @@
         private FontAwesome.Sharp.IconButton settingsNavButton;
         private FontAwesome.Sharp.IconButton templatesNavButton;
         private Bible2PPT.Controls.MultiPanelPage buildMultiPanelPage;
+        private Bible2PPT.Controls.MultiPanelPage dbMultiPanelPage;
+        private FontAwesome.Sharp.IconButton dbNavButton;
         private FontAwesome.Sharp.IconButton biblesRemoveIconButton;
         private FontAwesome.Sharp.IconButton biblesAddIconButton;
         private FontAwesome.Sharp.IconButton biblesDownIconButton;
         private FontAwesome.Sharp.IconButton biblesUpIconButton;
         private System.Windows.Forms.TableLayoutPanel buildLeftTableLayoutPanel;
         private System.Windows.Forms.TableLayoutPanel buildRightTableLayoutPanel;
+        private System.Windows.Forms.TableLayoutPanel biblesButtonTableLayoutPanel;
         private System.Windows.Forms.ColumnHeader columnHeader5;
         private System.Windows.Forms.ToolStripStatusLabel builderToolStripStatusLabel;
         private System.Windows.Forms.ToolStripProgressBar builderToolStripProgressBar;

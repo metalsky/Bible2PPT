@@ -83,6 +83,12 @@ namespace Bible2PPT
         /// </summary>
         public int NumberOfVerseLinesPerSlide { get; set; } = 6;
 
+        /// <summary>
+        /// Offset: 5, Length: 1
+        /// 0 = Dark, 1 = Light
+        /// </summary>
+        public AppTheme Theme { get; set; } = AppTheme.Dark;
+
         public AppConfig() : base(ConfigPath, ConfigSize)
         {
         }
@@ -95,6 +101,7 @@ namespace Bible2PPT
             b[0] |= (byte)((int)ShowChapterNumber << 2);
             b[0] |= (byte)(SeperateByChapter ? 16 : 0);
             b[0] |= (byte)(UseCache ? 32 : 0);
+            b[5] = (byte)(int)Theme;
             BitConverter.GetBytes(BibleSourceId).CopyTo(b, 1);
             BitConverter.GetBytes(BibleVersionId).CopyTo(b, 165);
             for (var i = 0; i < 9; i++)
@@ -112,6 +119,8 @@ namespace Bible2PPT
             ShowChapterNumber = (TemplateTextOptions)((s[0] & 4) >> 2);
             SeperateByChapter = (s[0] & 16) == 16;
             //UseCache = (s[0] & 32) == 32;
+            int themeVal = s[5];
+            Theme = (themeVal <= 1) ? (AppTheme)themeVal : AppTheme.Dark;
             BibleSourceId = BitConverter.ToInt32(s, 1);
             BibleVersionId = BitConverter.ToInt32(s, 165);
             for (var i = 0; i < 9; i++)

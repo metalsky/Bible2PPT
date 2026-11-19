@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Bible2PPT.Bibles;
 using Bible2PPT.Extensions;
@@ -20,6 +21,11 @@ namespace Bible2PPT
     partial class MainForm
     {
         private readonly BindingList<Bible> biblesToBuild = new BindingList<Bible>();
+
+        private Button _offlineSaveButton = null!;
+        private Button _dbEditButton = null!;
+        private bool _offlineRunning;
+        private CancellationTokenSource? _offlineCts;
 
         private void InitializeBuildComponent()
         {
@@ -67,7 +73,49 @@ namespace Bible2PPT
             sourceComboBox.SelectedValueChanged += SourceComboBox_SelectedValueChanged;
             // 마지막으로 선택한 소스 불러오기
             sourceComboBox.SelectedValue = AppConfig.Context.BibleSourceId;
+
+            // 오프라인 저장 & DB 편집 버튼
+            CreateOfflineAndDbEditButtons();
         }
+
+        #region 오프라인 저장 & DB 편집 버튼
+
+        private void CreateOfflineAndDbEditButtons()
+        {
+            var flow = new FlowLayoutPanel
+            {
+                FlowDirection = FlowDirection.LeftToRight,
+                AutoSize = false,
+                Margin = new Padding(0),
+                Padding = new Padding(1),
+            };
+            var font = new System.Drawing.Font("Microsoft YaHei", 8F);
+            _offlineSaveButton = new Button
+            {
+                Text = "오프라인 저장",
+                AutoSize = false,
+                Width = 92,
+                Height = 38,
+                Font = font,
+                Margin = new Padding(1),
+            };
+            _dbEditButton = new Button
+            {
+                Text = "DB 편집",
+                AutoSize = false,
+                Width = 44,
+                Height = 38,
+                Font = font,
+                Margin = new Padding(1),
+            };
+            flow.Controls.Add(_offlineSaveButton);
+            flow.Controls.Add(_dbEditButton);
+            biblesButtonTableLayoutPanel.Controls.Add(flow, 2, 0);
+            _offlineSaveButton.Click += OfflineSaveButton_Click;
+            _dbEditButton.Click += DbEditButton_Click;
+        }
+
+        #endregion 오프라인 저장 & DB 편집 버튼
 
         #region 빌드 대상 성경 관리
 
@@ -553,5 +601,108 @@ namespace Bible2PPT
 * 표시: 접미사 사용 가능
 예) [CHAP:장] -> n장", templateEditButton, Int16.MaxValue);
         }
+
+        #region 오프라인 저장
+
+        private async void OfflineSaveButton_Click(object sender, EventArgs e)
+        {
+            if (_offlineRunning)
+            {
+                _offlineCts?.Cancel();
+                return;
+            }
+
+            if (biblesToBuild.Count == 0)
+            {
+                MessageBox.Show("오프라인 저장할 성경을 먼저 추가하세요.\n소스와 성경을 선택하세요.", "성경2PPT");
+                return;
+            }
+
+            _offlineRunning = true;
+            var cts = new CancellationTokenSource();
+            _offlineCts = cts;
+            _offlineSaveButton.Text = "저장 중 ...";
+
+            try
+            {
+                await DoOfflineSaveAsync(biblesToBuild, cts.Token);
+                MessageBox.Show("오프라인 저장 완료!", "성경2PPT", MessageBoxButtons.OK);
+            }
+            catch (OperationCanceledException)
+            {
+                MessageBox.Show("오프라인 저장이 중지되었습니다.", "성경2PPT", MessageBoxButtons.OK);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"오프라인 저장 오류:\n{ex.Message}", "성경2PPT", MessageBoxButtons.OK);
+            }
+            finally
+            {
+                _offlineCts?.Cancel();
+                _offlineCts = null;
+                _offlineRunning = false;
+                _offlineSaveButton.Text = "오프라인 저장";
+            }
+        }
+
+        private async Task DoOfflineSaveAsync(IReadOnlyCollection<Bible> bibles, CancellationToken ct)
+        {
+            var allChapters = new List<Chapter>();
+            foreach (var bible in bibles)
+            {
+                ct.ThrowIfCancellationRequested();
+                var books = await _bibleService.GetBooksAsync(bible).ConfigureAwait(true);
+                foreach (var book in books)
+                {
+                    ct.ThrowIfCancellationRequested();
+                    var chapters = await _bibleService.GetChaptersAsync(book).ConfigureAwait(true);
+                    allChapters.AddRange(chapters);
+                }
+            }
+
+            var totalChapters = allChapters.Count;
+            if (totalChapters == 0)
+            {
+                MessageBox.Show("저장할 장이 없습니다.", "성경2PPT", MessageBoxButtons.OK);
+                return;
+            }
+            _offlineSaveButton.Text = $"저장 중 {totalChapters}장";
+
+            int completed = 0;
+            foreach (var chapter in allChapters)
+            {
+                ct.ThrowIfCancellationRequested();
+                await _bibleService.GetVersesAsync(chapter).ConfigureAwait(true);
+                completed++;
+                if (completed % 20 == 0 || completed == totalChapters)
+                {
+                    var pct = (int)Math.Round((completed * 100.0) / totalChapters);
+                    _offlineSaveButton.Text = $"중지 {pct}% ({completed}/{totalChapters})";
+                }
+            }
+            _offlineSaveButton.Text = $"저장 완료 ({totalChapters}/{totalChapters})";
+        }
+
+        #endregion 오프라인 저장
+
+        #region DB 편집
+
+        private void DbEditButton_Click(object sender, EventArgs e)
+        {
+            if (biblesToBuild.Count == 0)
+            {
+                MessageBox.Show("DB를 편집할 성경을 먼저 추가하세요.", "성경2PPT");
+                return;
+            }
+
+            var selectedBible = biblesDataGridView.CurrentRow is not null
+                ? biblesToBuild[biblesDataGridView.CurrentRow.Index]
+                : biblesToBuild[0];
+
+            using var form = new DbEditForm(selectedBible, _bibleService);
+            form.ShowDialog();
+        }
+
+        #endregion DB 편집
     }
 }

@@ -28,6 +28,10 @@ namespace Bible2PPT
             InitializeHistoryComponent();
             InitializeTemplatesComponent();
             InitializeSettingsComponent();
+            InitializeDbComponent();
+
+            // 전체 다크 테마 적용
+            DarkTheme.Apply(this);
 
             // TODO: 마지막 페이지 기억하기
             mainMultiPanel.SelectedPage = buildMultiPanelPage;
@@ -44,18 +48,20 @@ namespace Bible2PPT
             historyNavButton,
             templatesNavButton,
             settingsNavButton,
+            dbNavButton,
         };
 
         private void MainMultiPanel_SelectedPanelChanged(object sender, EventArgs e)
         {
             // 제목 표시줄에 페이지 제목 추가
-            Text = $"{mainMultiPanel.SelectedPage.Text} - 성경2PPT";
+            Text = $"{mainMultiPanel.SelectedPage.Text} - 성경2PPT (by Metalsky)";
             var targetButton = mainMultiPanel.SelectedPage.Name switch
             {
                 nameof(buildMultiPanelPage) => buildNavButton,
                 nameof(historyMultiPanelPage) => historyNavButton,
                 nameof(templatesMultiPanelPage) => templatesNavButton,
                 nameof(settingsMultiPanelPage) => settingsNavButton,
+                nameof(dbMultiPanelPage) => dbNavButton,
                 _ => throw new NotImplementedException(mainMultiPanel.SelectedPage.Name),
             };
             // 연결된 Nav만 비활성화
@@ -74,6 +80,7 @@ namespace Bible2PPT
                 nameof(historyNavButton) => historyMultiPanelPage,
                 nameof(templatesNavButton) => templatesMultiPanelPage,
                 nameof(settingsNavButton) => settingsMultiPanelPage,
+                nameof(dbNavButton) => dbMultiPanelPage,
                 _ => throw new NotImplementedException((sender as Control).Name),
             };
             // 연결된 페이지 활성화

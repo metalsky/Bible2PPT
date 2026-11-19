@@ -1,4 +1,27 @@
-## [2.0.4](https://github.com/sunghwan2789/Bible2PPT/compare/v2.0.3...v2.0.4) (2022-02-04)
+## [2.1.0](https://github.com/metalsky/Bible2PPT/compare/v2.0.4...v2.1.0) (2026-11-20)
+
+### New Features
+
+* 갓피아 성경 검색 보완 — 신규 도메인(`https://www.godpia.com`) + 엔드포인트 교체,
+  합쳐진 구절(`dataSec="18-19"` range) 파싱 보강
+* 설정 메뉴 **다크/라이트 테마** 선택 (달/해 아이콘)
+* 설정 메뉴 **생성 PPT 파일(최근 2건)·DB 파일명/크기/리비전/저장시간/템플릿 정보** 표시
+* **DB 편집기** (좌측 메뉴 DB 아이콘) — 번역/책/장/절 트리 탐색, 구절 편집,
+  다른이름으로 저장, 복원, 리비전/버전 관리, 잘못된 DB 읽기 방지
+* `build-activity.log` 등 빌드 활동 기록 포함, **세부 문서화**
+  (`docs/기능_명세서.md`, `docs/작업_이력.md`, `docs/개선_안.md`)
+* **GitHub API 기반 버전관리** (`metalsky/Bible2PPT`, 태그 `v2.1.0`, 릴리스 노트)
+
+### Bug Fixes
+
+* 갓피아 기존 도메인(`http://bible.godpia.com`, 삭제됨)으로 인한 **검색 에러 수정**
+* "오프라인 저장" 버튼 글자 잘림 수정 (버튼 높이 확보)
+
+### Breaking Changes
+
+* 대상 프레임워크 **.NET 8.0-windows** (이전 버전은 .NET Framework 4.8)
+
+---
 
 
 ### Bug Fixes
