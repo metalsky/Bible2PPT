@@ -94,8 +94,8 @@ namespace Bible2PPT
             {
                 Text = "오프라인 저장",
                 AutoSize = false,
-                Width = 92,
-                Height = 38,
+                Width = 88,
+                Height = 36,
                 Font = font,
                 Margin = new Padding(1),
             };
@@ -103,8 +103,8 @@ namespace Bible2PPT
             {
                 Text = "DB 편집",
                 AutoSize = false,
-                Width = 44,
-                Height = 38,
+                Width = 56,
+                Height = 36,
                 Font = font,
                 Margin = new Padding(1),
             };
@@ -677,10 +677,10 @@ namespace Bible2PPT
                 if (completed % 20 == 0 || completed == totalChapters)
                 {
                     var pct = (int)Math.Round((completed * 100.0) / totalChapters);
-                    _offlineSaveButton.Text = $"중지 {pct}% ({completed}/{totalChapters})";
+                    _offlineSaveButton.Text = $"저장 {pct}% ({completed}/{totalChapters})";
                 }
             }
-            _offlineSaveButton.Text = $"저장 완료 ({totalChapters}/{totalChapters})";
+            _offlineSaveButton.Text = $"저장 완료 ({totalChapters}장)";
         }
 
         #endregion 오프라인 저장
@@ -689,18 +689,8 @@ namespace Bible2PPT
 
         private void DbEditButton_Click(object sender, EventArgs e)
         {
-            if (biblesToBuild.Count == 0)
-            {
-                MessageBox.Show("DB를 편집할 성경을 먼저 추가하세요.", "성경2PPT");
-                return;
-            }
-
-            var selectedBible = biblesDataGridView.CurrentRow is not null
-                ? biblesToBuild[biblesDataGridView.CurrentRow.Index]
-                : biblesToBuild[0];
-
-            using var form = new DbEditForm(selectedBible, _bibleService);
-            form.ShowDialog();
+            // DB 편집 창(리사이즈 가능, 테마 적용, 전체 DB 카탈로그 기반)을 나타낸다.
+            OpenDbEditor();
         }
 
         #endregion DB 편집

@@ -26,12 +26,10 @@ namespace Bible2PPT
             InitializeComponent();
             InitializeBuildComponent();
             InitializeHistoryComponent();
-            InitializeTemplatesComponent();
             InitializeSettingsComponent();
-            InitializeDbComponent();
 
-            // 전체 다크 테마 적용
-            DarkTheme.Apply(this);
+            // 저장된 테마(다크/라이트) 적용 — 시작 시 항상 다크였던 버그 수정
+            ThemeManager.Apply(this);
 
             // TODO: 마지막 페이지 기억하기
             mainMultiPanel.SelectedPage = buildMultiPanelPage;
@@ -46,7 +44,6 @@ namespace Bible2PPT
         {
             buildNavButton,
             historyNavButton,
-            templatesNavButton,
             settingsNavButton,
             dbNavButton,
         };
@@ -59,9 +56,7 @@ namespace Bible2PPT
             {
                 nameof(buildMultiPanelPage) => buildNavButton,
                 nameof(historyMultiPanelPage) => historyNavButton,
-                nameof(templatesMultiPanelPage) => templatesNavButton,
                 nameof(settingsMultiPanelPage) => settingsNavButton,
-                nameof(dbMultiPanelPage) => dbNavButton,
                 _ => throw new NotImplementedException(mainMultiPanel.SelectedPage.Name),
             };
             // 연결된 Nav만 비활성화
@@ -74,17 +69,32 @@ namespace Bible2PPT
 
         private void Nav_Click(object sender, EventArgs e)
         {
-            var targetPage = (sender as Control).Name switch
+            var name = (sender as Control)?.Name;
+
+            // DB 메뉴는 별도 리사이즈 가능한 편집 창(1024x786+)으로 표시한다.
+            if (name == nameof(dbNavButton))
+            {
+                OpenDbEditor();
+                return;
+            }
+
+            var targetPage = name switch
             {
                 nameof(buildNavButton) => buildMultiPanelPage,
                 nameof(historyNavButton) => historyMultiPanelPage,
-                nameof(templatesNavButton) => templatesMultiPanelPage,
                 nameof(settingsNavButton) => settingsMultiPanelPage,
-                nameof(dbNavButton) => dbMultiPanelPage,
-                _ => throw new NotImplementedException((sender as Control).Name),
+                _ => throw new NotImplementedException(name),
             };
             // 연결된 페이지 활성화
             mainMultiPanel.SelectedPage = targetPage;
         }
+
+        /// <summary>DB 편집 창(리사이즈 가능, 테마 적용)을 나타낸다.</summary>
+        private void OpenDbEditor()
+        {
+            using var form = new DbEditorForm(_bibleService);
+            form.ShowDialog();
+        }
+
     }
 }

@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Configuration;
 using System.IO;
@@ -34,7 +35,10 @@ namespace Bible2PPT
         };
 
         /// <summary>
-        /// 현재 앱이 사용하는 DB 파일 경로(app.config의 BibleContext 연결 문자열 기준).
+        /// 현재 앱이 사용하는 DB 파일 경로.
+        /// 사용자 폴더(%APPDATA%\Bible2PPT)에 영구 저장하는 구조:
+        /// app.config의 Data Source가 절대경로이면 그 경로를 사용하고,
+        /// 상대 파일명이면 사용자 폴더를 기준 삼는다.
         /// </summary>
         public static string ActiveDbPath
         {
@@ -47,12 +51,19 @@ namespace Bible2PPT
                     var m = Regex.Match(cs, @"Data Source\s*=\s*([^;]+)");
                     if (m.Success)
                     {
-                        dataName = m.Groups[1].Value.Trim();
+                        string candidate = m.Groups[1].Value.Trim();
+                        // 절대경로이고 실제 파일이 있으면 그대로 사용(호환용).
+                        if (Path.IsPathRooted(candidate) && File.Exists(candidate))
+                        {
+                            return Path.GetFullPath(candidate);
+                        }
+                        dataName = Path.GetFileName(candidate);
                     }
                 }
 
-                string exeDir = Path.GetDirectoryName(Application.ExecutablePath)!;
-                return Path.GetFullPath(Path.Combine(exeDir, dataName));
+                // 사용자 폴더(%APPDATA%\Bible2PPT)로 영구 저장.
+                // 앱 폴더가 다시 빌드·재설치되어도 DB는 유지된다.
+                return Path.Combine(AppConfig.UserDataPath, dataName);
             }
         }
 
@@ -77,8 +88,10 @@ namespace Bible2PPT
             }
 
             // SQLite 마기 헤더 확인
+            // SQLite가 파일 핸들(저장/읽기)을 잡고 있을 수 있으므로 File.OpenRead(FileShare.None)와 충돌하지
+            // 않도록 읽기 공유를 허용해 열린다.
             byte[] header = new byte[16];
-            using (FileStream fs = File.OpenRead(path))
+            using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
                 if (fs.Read(header, 0, 16) != 16 || !header.SequenceEqual(SqliteHeader))
                 {
@@ -87,7 +100,9 @@ namespace Bible2PPT
             }
 
             // 무결성 확인 및 Bibles 테이블 확인
-            using (SqliteConnection conn = new($"File:{Uri.EscapeDataString(path)};mode=ro;cache=shared;"))
+            // SQLite 연결 문자열: "Data Source=<절대경로>" 형식 (File: URI / mode=로/ cache=shared는
+            // Microsoft.Data.Sqlite에서 지원하지 않으므로 사용하지 않는다.)
+            using (SqliteConnection conn = new($"Data Source={path}"))
             {
                 conn.Open();
 
@@ -128,7 +143,7 @@ namespace Bible2PPT
 
             try
             {
-                using var conn = new SqliteConnection($"File:{Uri.EscapeDataString(path)};mode=ro;cache=shared;");
+                using var conn = new SqliteConnection($"Data Source={path}");
                 conn.Open();
 
                 using var cmd = new SqliteCommand(
@@ -165,7 +180,7 @@ namespace Bible2PPT
 
             // 1) 활성 DB에 저장 meta를 기록
             int revision = 0;
-            using (var conn = new SqliteConnection($"File:{Uri.EscapeDataString(activePath)};mode=write;cache=shared;"))
+            using (var conn = new SqliteConnection($"Data Source={activePath}"))
             {
                 conn.Open();
 

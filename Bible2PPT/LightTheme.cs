@@ -12,8 +12,9 @@ public static class LightTheme
     public static readonly Color Background = Color.FromArgb(248, 248, 248);
     public static readonly Color Surface = Color.FromArgb(255, 255, 255);
     public static readonly Color SurfaceLight = Color.FromArgb(244, 244, 244);
-    public static readonly Color Text = Color.FromArgb(32, 32, 32);
-    public static readonly Color Muted = Color.FromArgb(100, 100, 100);
+    // 밝은 테마는 요청대로 글자를 검정색으로 사용한다(흰 배경에 잘 보이도록).
+    public static readonly Color Text = Color.Black;
+    public static readonly Color Muted = Color.FromArgb(60, 60, 60);
     public static readonly Color Accent = Color.FromArgb(0, 120, 212);
     public static readonly Color Selection = Color.FromArgb(217, 233, 255);
     public static readonly Color SelectionText = Color.FromArgb(32, 32, 32);
@@ -127,8 +128,14 @@ public static class LightTheme
         dataGrid.BackgroundColor = Surface;
         dataGrid.ColumnHeadersDefaultCellStyle.BackColor = HeaderBg;
         dataGrid.ColumnHeadersDefaultCellStyle.ForeColor = Text;
+        // 행 번호 열도 테마에 따라 색을 정한다 (라이트/다크 공통)
+        dataGrid.RowHeadersDefaultCellStyle.BackColor = Surface;
+        dataGrid.RowHeadersDefaultCellStyle.ForeColor = Text;
+        dataGrid.RowHeadersDefaultCellStyle.SelectionBackColor = Selection;
+        dataGrid.RowHeadersDefaultCellStyle.SelectionForeColor = SelectionText;
         dataGrid.DefaultCellStyle.ForeColor = Text;
         dataGrid.DefaultCellStyle.BackColor = Surface;
         dataGrid.DefaultCellStyle.SelectionBackColor = Selection;
+        dataGrid.DefaultCellStyle.SelectionForeColor = SelectionText;
     }
 }

@@ -71,12 +71,18 @@ namespace Bible2PPT
             FindHistoryDataGridViewRow(e.Job).Cells[historyJobProgress.Name].Value = "대기 중";
             // 취소 가능한지 나타냄
             FindHistoryDataGridViewRow(e.Job).Tag = true;
+
+            builderToolStripStatusLabel.Text = "빌드 대기 중";
+            builderToolStripProgressBar.Visible = false;
         }
 
         private void Builder_JobProgress(JobProgressEventArgs e)
         {
             FindHistoryDataGridViewRow(e.Job).Cells[historyJobProgress.Name].Value =
                 $"{e.Progress:p} {e.Chapters}장 중 {e.ChaptersDone}장";
+            builderToolStripStatusLabel.Text = $"빌드 진행 {e.Progress:p} ({e.ChaptersDone}/{e.Chapters}장)";
+            builderToolStripProgressBar.Value = (int)Math.Round(e.Progress * 100);
+            builderToolStripProgressBar.Visible = true;
         }
 
         private void Builder_JobCompleted(JobCompletedEventArgs e)
@@ -87,14 +93,20 @@ namespace Bible2PPT
             if (e.IsCancelled)
             {
                 jobHistory.RemoveAt(FindHistoryDataGridViewRow(e.Job).Index);
+                builderToolStripStatusLabel.Text = "빌드 취소됨";
+                builderToolStripProgressBar.Visible = false;
             }
             else if (e.IsFaulted)
             {
                 FindHistoryDataGridViewRow(e.Job).Cells[historyJobProgress.Name].Value = $"{e.Exception}";
+                builderToolStripStatusLabel.Text = "빌드 실패";
+                builderToolStripProgressBar.Visible = false;
             }
             else
             {
                 FindHistoryDataGridViewRow(e.Job).Cells[historyJobProgress.Name].Value = "완료";
+                builderToolStripStatusLabel.Text = "빌드 완료";
+                builderToolStripProgressBar.Visible = false;
                 if (autoOpenCheckBox.Checked)
                 {
                     Process.Start(new ProcessStartInfo

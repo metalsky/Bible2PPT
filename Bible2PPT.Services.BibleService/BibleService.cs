@@ -17,25 +17,7 @@ public class BibleService
         _bibleIndexService = bibleIndexService;
     }
 
-    /// <summary>
-    /// 개역개정(4판)에 존재하는 합쳐진 구절(2~3개의 절이 하나의 절).
-    /// (책, 장) -> range의 첫 절 번호.
-    /// 예: 신6:18-19 -> (Deuteronomy, 6) -> 18.
-    /// </summary>
-    private static readonly Dictionary<(BookKey book, int chapter), int> MergedVerseFirstNumber = new()
-    {
-        { (BookKey.Deuteronomy, 6), 18 },
-        { (BookKey.Deuteronomy, 15), 4 },
-        { (BookKey.Deuteronomy, 30), 9 },
-        { (BookKey.IChronicles, 16), 12 },
-        { (BookKey.Psalms, 92), 1 },
-        { (BookKey.Psalms, 105), 5 },
-        { (BookKey.Jeremiah, 32), 3 },
-        { (BookKey.Jeremiah, 33), 10 },
-        { (BookKey.Ezekiel, 24), 4 },
-        { (BookKey.Acts, 15), 25 },
-        { (BookKey.Romans, 9), 1 },
-    };
+
 
     public Bible? FindBible(int id)
     {
@@ -247,9 +229,9 @@ public class BibleService
             return false;
         }
 
-        if (MergedVerseFirstNumber.TryGetValue((book.Key, chapter.Number), out var merged))
+        if (MergedVerses.TryGetRange((book.Key, chapter.Number), out var range))
         {
-            mergedVerseNumber = merged;
+            mergedVerseNumber = range.first;
             return true;
         }
 

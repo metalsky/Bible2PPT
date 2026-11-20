@@ -65,7 +65,6 @@
             System.Windows.Forms.FlowLayoutPanel navBottomFlowLayoutPanel;
             this.buildNavButton = new FontAwesome.Sharp.IconButton();
             this.historyNavButton = new FontAwesome.Sharp.IconButton();
-            this.templatesNavButton = new FontAwesome.Sharp.IconButton();
             this.dbNavButton = new FontAwesome.Sharp.IconButton();
             this.builderToolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.builderToolStripProgressBar = new System.Windows.Forms.ToolStripProgressBar();
@@ -105,9 +104,7 @@
             this.historyLoadButton = new System.Windows.Forms.Button();
             this.historyOpenResultButton = new System.Windows.Forms.Button();
             this.autoOpenCheckBox = new System.Windows.Forms.CheckBox();
-            this.templatesMultiPanelPage = new Bible2PPT.Controls.MultiPanelPage();
             this.settingsMultiPanelPage = new Bible2PPT.Controls.MultiPanelPage();
-            this.dbMultiPanelPage = new Bible2PPT.Controls.MultiPanelPage();
             this.updateButton = new System.Windows.Forms.Button();
             this.cleanCacheButton = new System.Windows.Forms.Button();
             this.settingsNavButton = new FontAwesome.Sharp.IconButton();
@@ -207,7 +204,6 @@
             navTopFlowLayoutPanel.Controls.Add(this.buildNavButton);
             navTopFlowLayoutPanel.Controls.Add(this.historyNavButton);
             navTopFlowLayoutPanel.Controls.Add(this.dbNavButton);
-            navTopFlowLayoutPanel.Controls.Add(this.templatesNavButton);
             navTopFlowLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             navTopFlowLayoutPanel.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
             navTopFlowLayoutPanel.Location = new System.Drawing.Point(0, 0);
@@ -257,28 +253,6 @@
             this.toolTip.SetToolTip(this.historyNavButton, "PPT 제작 기록");
             this.historyNavButton.UseVisualStyleBackColor = false;
             this.historyNavButton.Click += new System.EventHandler(this.Nav_Click);
-            // 
-            // templatesNavButton
-            // 
-            this.templatesNavButton.BackColor = System.Drawing.SystemColors.Menu;
-            this.templatesNavButton.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.templatesNavButton.FlatAppearance.BorderSize = 0;
-            this.templatesNavButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.templatesNavButton.ForeColor = System.Drawing.SystemColors.MenuText;
-            this.templatesNavButton.IconChar = FontAwesome.Sharp.IconChar.Images;
-            this.templatesNavButton.IconColor = System.Drawing.SystemColors.MenuText;
-            this.templatesNavButton.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            this.templatesNavButton.IconSize = 36;
-            this.templatesNavButton.Location = new System.Drawing.Point(0, 144);
-            this.templatesNavButton.Margin = new System.Windows.Forms.Padding(0);
-            this.templatesNavButton.Name = "templatesNavButton";
-            this.templatesNavButton.Padding = new System.Windows.Forms.Padding(0, 4, 0, 0);
-            this.templatesNavButton.Size = new System.Drawing.Size(48, 48);
-            this.templatesNavButton.TabIndex = 3;
-            this.toolTip.SetToolTip(this.templatesNavButton, "템플릿 관리");
-            this.templatesNavButton.UseVisualStyleBackColor = false;
-            this.templatesNavButton.Visible = false;
-            this.templatesNavButton.Click += new System.EventHandler(this.Nav_Click);
             // 
             // dbNavButton
             // 
@@ -332,9 +306,7 @@
             // 
             this.mainMultiPanel.Controls.Add(this.buildMultiPanelPage);
             this.mainMultiPanel.Controls.Add(this.historyMultiPanelPage);
-            this.mainMultiPanel.Controls.Add(this.templatesMultiPanelPage);
             this.mainMultiPanel.Controls.Add(this.settingsMultiPanelPage);
-            this.mainMultiPanel.Controls.Add(this.dbMultiPanelPage);
             this.mainMultiPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.mainMultiPanel.Location = new System.Drawing.Point(48, 0);
             this.mainMultiPanel.Margin = new System.Windows.Forms.Padding(0);
@@ -373,7 +345,8 @@
             this.buildSplitContainer.Panel2.Controls.Add(this.buildRightTableLayoutPanel);
             this.buildSplitContainer.Panel2.Padding = new System.Windows.Forms.Padding(0, 10, 13, 10);
             this.buildSplitContainer.Size = new System.Drawing.Size(461, 312);
-            this.buildSplitContainer.SplitterDistance = 251;
+            // 왼쪽(소스/성경/템플릿)을 440px로 확보해 1000px 너비 창에서 잘 보이게.
+            this.buildSplitContainer.SplitterDistance = 440;
             this.buildSplitContainer.SplitterWidth = 13;
             this.buildSplitContainer.TabIndex = 0;
             // 
@@ -473,7 +446,7 @@
             biblesTableLayoutPanel.Margin = new System.Windows.Forms.Padding(0);
             biblesTableLayoutPanel.Name = "biblesTableLayoutPanel";
             biblesTableLayoutPanel.RowCount = 2;
-            biblesTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 24F));
+            biblesTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
             biblesTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             biblesTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             biblesTableLayoutPanel.Size = new System.Drawing.Size(238, 104);
@@ -487,18 +460,18 @@
             biblesButtonTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             biblesButtonTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 24F));
             biblesButtonTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 24F));
-            biblesButtonTableLayoutPanel.Controls.Add(this.biblesUpIconButton, 0, 0);
-            biblesButtonTableLayoutPanel.Controls.Add(this.biblesDownIconButton, 1, 0);
-            biblesButtonTableLayoutPanel.Controls.Add(this.biblesAddIconButton, 3, 0);
-            biblesButtonTableLayoutPanel.Controls.Add(this.biblesRemoveIconButton, 4, 0);
             biblesButtonTableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             biblesButtonTableLayoutPanel.Location = new System.Drawing.Point(1, 1);
             biblesButtonTableLayoutPanel.Margin = new System.Windows.Forms.Padding(0);
             biblesButtonTableLayoutPanel.Name = "biblesButtonTableLayoutPanel";
             biblesButtonTableLayoutPanel.RowCount = 1;
             biblesButtonTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            biblesButtonTableLayoutPanel.Size = new System.Drawing.Size(236, 24);
+            biblesButtonTableLayoutPanel.Size = new System.Drawing.Size(236, 40);
             biblesButtonTableLayoutPanel.TabIndex = 0;
+            biblesButtonTableLayoutPanel.Controls.Add(this.biblesUpIconButton, 0, 0);
+            biblesButtonTableLayoutPanel.Controls.Add(this.biblesDownIconButton, 1, 0);
+            biblesButtonTableLayoutPanel.Controls.Add(this.biblesAddIconButton, 3, 0);
+            biblesButtonTableLayoutPanel.Controls.Add(this.biblesRemoveIconButton, 4, 0);
             // 
             // biblesUpIconButton
             // 
@@ -1210,12 +1183,12 @@
             // 
             // historySplitChaptersIntoFileColumn
             // 
-            this.historySplitChaptersIntoFileColumn.HeaderText = "장별로 나누기";
+            this.historySplitChaptersIntoFileColumn.HeaderText = "장별 분리";
             this.historySplitChaptersIntoFileColumn.Name = "historySplitChaptersIntoFileColumn";
             this.historySplitChaptersIntoFileColumn.ReadOnly = true;
             this.historySplitChaptersIntoFileColumn.Resizable = System.Windows.Forms.DataGridViewTriState.True;
             this.historySplitChaptersIntoFileColumn.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.historySplitChaptersIntoFileColumn.Width = 24;
+            this.historySplitChaptersIntoFileColumn.Width = 80;
             // 
             // historyJobProgress
             // 
@@ -1283,15 +1256,6 @@
             this.autoOpenCheckBox.UseVisualStyleBackColor = true;
             this.autoOpenCheckBox.CheckedChanged += new System.EventHandler(this.AutoOpenCheckBox_CheckedChanged);
             // 
-            // templatesMultiPanelPage
-            // 
-            this.templatesMultiPanelPage.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.templatesMultiPanelPage.Location = new System.Drawing.Point(0, 0);
-            this.templatesMultiPanelPage.Name = "templatesMultiPanelPage";
-            this.templatesMultiPanelPage.Size = new System.Drawing.Size(461, 312);
-            this.templatesMultiPanelPage.TabIndex = 0;
-            this.templatesMultiPanelPage.Text = "템플릿 관리";
-            // 
             // settingsMultiPanelPage
             // 
             this.settingsMultiPanelPage.Controls.Add(this.updateButton);
@@ -1303,14 +1267,7 @@
             this.settingsMultiPanelPage.TabIndex = 0;
             this.settingsMultiPanelPage.Text = "설정";
             // 
-            // dbMultiPanelPage
             // 
-            this.dbMultiPanelPage.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dbMultiPanelPage.Location = new System.Drawing.Point(0, 0);
-            this.dbMultiPanelPage.Name = "dbMultiPanelPage";
-            this.dbMultiPanelPage.Size = new System.Drawing.Size(461, 312);
-            this.dbMultiPanelPage.TabIndex = 0;
-            this.dbMultiPanelPage.Text = "DB";
             // 
             // updateButton
             // 
@@ -1370,10 +1327,12 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.SystemColors.Window;
-            this.ClientSize = new System.Drawing.Size(509, 335);
+            // 1024x786 이상의 화면 기준: 기본 1000x740, 중앙에 띄움, 크기가 자유롭게 조정 가능
+            this.ClientSize = new System.Drawing.Size(1100, 800);
             this.Controls.Add(mainTableLayoutPanel);
             this.Name = "MainForm";
-            this.Text = "성경2PPT (by Metalsky)";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Text = "Bible2PPT (by Metalsky)";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             mainTableLayoutPanel.ResumeLayout(false);
             mainTableLayoutPanel.PerformLayout();
@@ -1444,13 +1403,10 @@
         private FontAwesome.Sharp.IconButton buildNavButton;
         private Bible2PPT.Controls.MultiPanel mainMultiPanel;
         private Bible2PPT.Controls.MultiPanelPage historyMultiPanelPage;
-        private Bible2PPT.Controls.MultiPanelPage templatesMultiPanelPage;
         private Bible2PPT.Controls.MultiPanelPage settingsMultiPanelPage;
         private FontAwesome.Sharp.IconButton historyNavButton;
         private FontAwesome.Sharp.IconButton settingsNavButton;
-        private FontAwesome.Sharp.IconButton templatesNavButton;
         private Bible2PPT.Controls.MultiPanelPage buildMultiPanelPage;
-        private Bible2PPT.Controls.MultiPanelPage dbMultiPanelPage;
         private FontAwesome.Sharp.IconButton dbNavButton;
         private FontAwesome.Sharp.IconButton biblesRemoveIconButton;
         private FontAwesome.Sharp.IconButton biblesAddIconButton;

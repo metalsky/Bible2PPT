@@ -120,7 +120,7 @@ namespace Bible2PPT
             int shownGenerated = 0;
             foreach (var job in _builder.GetJobs().OrderByDescending(x => x.CreatedAt).Take(2))
             {
-                string desc = DescribePptOutput(job.OutputDestination);
+                string desc = UiText.DescribePptOutput(job.OutputDestination);
                 if (string.IsNullOrWhiteSpace(desc))
                 {
                     continue;
@@ -139,7 +139,7 @@ namespace Bible2PPT
             {
                 long dbSize = new FileInfo(dbPath).Length;
                 var meta = DbFileService.ReadActiveMeta();
-                lines.Add($"DB: {Path.GetFileName(dbPath)} ({HumanizeSize(dbSize)})");
+                lines.Add($"DB: {Path.GetFileName(dbPath)} ({UiText.HumanizeSize(dbSize)})");
                 if (meta is not null)
                 {
                     lines.Add($"  리비전: v{meta.Revision}  ({meta.SavedAt:yyyy-MM-dd HH:mm})");
@@ -155,7 +155,7 @@ namespace Bible2PPT
             if (File.Exists(templatePath))
             {
                 long tSize = new FileInfo(templatePath).Length;
-                lines.Add($"템플릿: {Path.GetFileName(templatePath)} ({HumanizeSize(tSize)})");
+                lines.Add($"템플릿: {Path.GetFileName(templatePath)} ({UiText.HumanizeSize(tSize)})");
             }
             else
             {
@@ -165,49 +165,7 @@ namespace Bible2PPT
             _fileInfoBox.Text = string.Join("\n", lines);
         }
 
-        /// <summary>
-        /// PPT 생성 대상 경로(파일 또는 장별 출력 폴더)를 파일명·크기·파일 수로 요약한다.
-        /// </summary>
-        private static string DescribePptOutput(string? path)
-        {
-            if (string.IsNullOrWhiteSpace(path))
-            {
-                return string.Empty;
-            }
 
-            if (File.Exists(path))
-            {
-                return $"{Path.GetFileName(path)} ({HumanizeSize(new FileInfo(path).Length)})";
-            }
-
-            if (Directory.Exists(path))
-            {
-                int count = 0;
-                long total = 0;
-                try
-                {
-                    foreach (var file in Directory.GetFiles(path, "*.pptx", SearchOption.AllDirectories))
-                    {
-                        count++;
-                        total += new FileInfo(file).Length;
-                        if (count >= 1000)
-                        {
-                            break;
-                        }
-                    }
-                }
-                catch
-                {
-                    count = -1;
-                }
-
-                return count > 0
-                    ? $"{Path.GetFileName(path)} ({HumanizeSize(total)}, {count}개)"
-                    : string.Empty;
-            }
-
-            return string.Empty;
-        }
 
         private void UpdateButton_Click(object sender, EventArgs e)
         {

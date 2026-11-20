@@ -1,5 +1,7 @@
-﻿using System.Globalization;
+using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -13,6 +15,7 @@ namespace Bible2PPT.Sources;
 /// 갓피아 성경 소스.
 /// 갓피아 홈페이지 재설치로 기존 http://bible.godpia.com은 더 이상 작동하지 않는다.
 /// 새로운 사이트는 https://www.godpia.com이며, 아래 엔드포인트가 정상으로 동작한다:
+///   번역 목록 : (내부 정의, 8개)
 ///   책   : GET /read/reading.asp?ver={ver}
 ///   장   : GET /include/asp/chapinfo.asp?ver={ver}&vol={vol}
 ///   구절 : GET /read/reading_body.asp?ver={ver}&vol={volname}&chap={chap}
@@ -20,6 +23,9 @@ namespace Bible2PPT.Sources;
 public class GodpiaBible : BibleSource
 {
     private const string BaseUrl = "https://www.godpia.com";
+
+    /// <summary>HTTP 요청 재시도 횟수 (초기 1초, 2초 간격으로 지수적 백오프).</summary>
+    private const int MaxRetryAttempts = 3;
 
     private static readonly HttpClient Client = new()
     {
@@ -48,8 +54,10 @@ public class GodpiaBible : BibleSource
     // 개역개정(4판)은 2~3개의 절이 하나의 절로 합쳐져 있는 구절이 있다(신6:18-19, 시92:1-3 등).
     // 이 합쳐진 구절은 range 번호(dataSec="18-19")로 제공되므로 (\d+)만으로는 못 잡아
     // 구절이 누락된다. range 번호까지 매칭해 첫 번호로 저장한다.
+    // 갓피아 사이트는 <li dataSec="1"> -> <li datasec="1">로 속성 대소를 변경했다.
+    // (2026-11 갓피아 재설치 후) 둘 다 지원하도록 data[Ss]ec로 매칭한다.
     private static readonly Regex VersePattern = new(
-        @"<li[^>]*dataSec=""(\d+(?:-\d+)?)""[^>]*>([\s\S]*?)</li>",
+        @"<li[^>]*data[Ss]ec=""(\d+(?:-\d+)?)""[^>]*>([\s\S]*?)</li>",
         RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
     // <span class="bible-read-no">N</span> : 절 번호 스페이
@@ -86,12 +94,18 @@ public class GodpiaBible : BibleSource
         new() { OnlineId = "greek", Name = "헬라어(신약)", LanguageCode = "el" },
     });
 
-    public override async Task<List<Book>> GetBooksOnlineAsync(Bible bible)
+    /// <summary>
+    /// 갓피아 책 목록 HTML에서 책을 파싱한다.
+    /// (HTTP와 분리되어 테스트에 쓸 수 있는 정적 메소드)
+    /// </summary>
+    public static List<Book> ParseBooks(string html)
     {
-        var data = await Client.GetStringAsync($"/read/reading.asp?ver={bible.OnlineId}").ConfigureAwait(false);
+        if (string.IsNullOrWhiteSpace(html))
+        {
+            throw new InvalidDataException("갓피아 책 목록 HTML이 비어 있습니다.");
+        }
 
-        var matches = BookPattern.Matches(data);
-        return matches.Cast<Match>()
+        return BookPattern.Matches(html).Cast<Match>()
             .Select(i => new Book
             {
                 OnlineId = i.Groups[1].Value,
@@ -101,15 +115,18 @@ public class GodpiaBible : BibleSource
             .ToList();
     }
 
-    public override async Task<List<Chapter>> GetChaptersOnlineAsync(Book book)
+    /// <summary>
+    /// 갓피아 장 목록 HTML에서 장을 파싱한다.
+    /// (HTTP와 분리되어 테스트에 쓸 수 있는 정적 메소드)
+    /// </summary>
+    public static List<Chapter> ParseChapters(string html)
     {
-        var ver = book.Bible?.OnlineId ?? throw new InvalidOperationException("장 목록을 가져올 때 성경(translation) 참조가 없습니다.");
-        var vol = book.OnlineId;
+        if (string.IsNullOrWhiteSpace(html))
+        {
+            throw new InvalidDataException("갓피아 장 목록 HTML이 비어 있습니다.");
+        }
 
-        var data = await Client.GetStringAsync($"/include/asp/chapinfo.asp?ver={ver}&vol={vol}").ConfigureAwait(false);
-
-        var matches = ChapterPattern.Matches(data);
-        return matches.Cast<Match>()
+        return ChapterPattern.Matches(html).Cast<Match>()
             .Select(i => new Chapter
             {
                 OnlineId = i.Groups[1].Value,
@@ -119,18 +136,19 @@ public class GodpiaBible : BibleSource
             .ToList();
     }
 
-    public override async Task<List<Verse>> GetVersesOnlineAsync(Chapter chapter)
+    /// <summary>
+    /// 갓피아 구절 목록 HTML에서 구절을 파싱한다.
+    /// (HTTP와 분리되어 테스트에 쓸 수 있는 정적 메소드)
+    /// </summary>
+    public static List<Verse> ParseVerses(string html)
     {
-        var book = chapter.Book;
-        var ver = book?.Bible?.OnlineId ?? throw new InvalidOperationException("구절 목록을 가져올 때 성경(translation) 참조가 없습니다.");
-        var vol = book?.OnlineId ?? throw new InvalidOperationException("구절 목록을 가져올 때 책 참조가 없습니다.");
-        var chap = chapter.Number;
+        if (string.IsNullOrWhiteSpace(html))
+        {
+            throw new InvalidDataException("갓피아 구절 목록 HTML이 비어 있습니다.");
+        }
 
-        var data = await Client.GetStringAsync($"/read/reading_body.asp?ver={ver}&vol={vol}&chap={chap}").ConfigureAwait(false);
-
-        var matches = VersePattern.Matches(data);
+        var matches = VersePattern.Matches(html);
         var verses = new List<Verse>();
-
         foreach (Match m in matches)
         {
             verses.Add(new Verse
@@ -141,6 +159,80 @@ public class GodpiaBible : BibleSource
         }
 
         return verses;
+    }
+
+    public override async Task<List<Book>> GetBooksOnlineAsync(Bible bible)
+    {
+        var data = await GetStringWithRetryAsync($"/read/reading.asp?ver={bible.OnlineId}").ConfigureAwait(false);
+        return ParseBooks(data);
+    }
+
+    public override async Task<List<Chapter>> GetChaptersOnlineAsync(Book book)
+    {
+        var ver = book.Bible?.OnlineId ?? throw new InvalidOperationException("장 목록을 가져올 때 성경(translation) 참조가 없습니다.");
+        var vol = book.OnlineId;
+
+        var data = await GetStringWithRetryAsync($"/include/asp/chapinfo.asp?ver={ver}&vol={vol}").ConfigureAwait(false);
+        return ParseChapters(data);
+    }
+
+    public override async Task<List<Verse>> GetVersesOnlineAsync(Chapter chapter)
+    {
+        var book = chapter.Book;
+        var ver = book?.Bible?.OnlineId ?? throw new InvalidOperationException("구절 목록을 가져올 때 성경(translation) 참조가 없습니다.");
+        var vol = book?.OnlineId ?? throw new InvalidOperationException("구절 목록을 가져올 때 책 참조가 없습니다.");
+        var chap = chapter.Number;
+
+        var data = await GetStringWithRetryAsync($"/read/reading_body.asp?ver={ver}&vol={vol}&chap={chap}").ConfigureAwait(false);
+        return ParseVerses(data);
+    }
+
+    /// <summary>
+    /// 갓피아 페이지를 가져온다.
+    /// 일시적인 네트워크/HTTP 오류 시 지수적 백오프(1초, 2초)를 붙여 재시도하고,
+    /// 재시도 횟수를 초과하면 UI의 기존 재시도 다이얼로그가
+    /// 잡도록 <see cref="WebException"/>을 던진다.
+    /// </summary>
+    private static async Task<string> GetStringWithRetryAsync(string relativePath)
+    {
+        Exception? lastException = null;
+
+        for (var attempt = 1; attempt <= MaxRetryAttempts; attempt++)
+        {
+            try
+            {
+                using var response = await Client.GetAsync(relativePath).ConfigureAwait(false);
+                response.EnsureSuccessStatusCode();
+                return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                // 취소 요청됨: 재시도하지 않고 전파
+                throw;
+            }
+            catch (Exception ex)
+            {
+                lastException = ex;
+                if (attempt == MaxRetryAttempts)
+                {
+                    break;
+                }
+
+                // 지수적 백오프: 1초, 2초
+                var delay = TimeSpan.FromSeconds(Math.Pow(2, attempt - 1));
+                try
+                {
+                    await Task.Delay(delay).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+            }
+        }
+
+        var message = $"갓피아 성경 사이트({BaseUrl})에 연결할 수 없습니다. ({relativePath})\n{lastException?.Message}";
+        throw new WebException(message);
     }
 
     /// <summary>

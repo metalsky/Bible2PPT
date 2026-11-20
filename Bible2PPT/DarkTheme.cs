@@ -127,9 +127,15 @@ public static class DarkTheme
         dataGrid.BackgroundColor = Surface;
         dataGrid.ColumnHeadersDefaultCellStyle.BackColor = HeaderBg;
         dataGrid.ColumnHeadersDefaultCellStyle.ForeColor = Text;
+        // 행 번호 열도 테마에 따라 색을 정한다 (라이트/다크 공통)
+        dataGrid.RowHeadersDefaultCellStyle.BackColor = Surface;
+        dataGrid.RowHeadersDefaultCellStyle.ForeColor = Text;
+        dataGrid.RowHeadersDefaultCellStyle.SelectionBackColor = Selection;
+        dataGrid.RowHeadersDefaultCellStyle.SelectionForeColor = SelectionText;
         dataGrid.DefaultCellStyle.ForeColor = Text;
         dataGrid.DefaultCellStyle.BackColor = Surface;
         dataGrid.DefaultCellStyle.SelectionBackColor = Selection;
+        dataGrid.DefaultCellStyle.SelectionForeColor = SelectionText;
     }
 
 }

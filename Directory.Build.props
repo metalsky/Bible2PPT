@@ -1,0 +1,16 @@
+<Project>
+  <!--
+    전 프로젝트에 적용되는 공통 빌드 설정.
+    소스 폴더는 그대로 두되, 빌드 산출물(bin/obj)은 루트 build/ 폴더로 일괄 분리한다.
+    구조: build/<프로젝트명>/(Debug|Release)/...
+  -->
+  <PropertyGroup>
+    <!-- 루트(build/를 포함)는 솔루션 폴더 기준. 비면 프로젝트 폴더 상위. MSBuild가 정제하지 않는 .. 문제를 피할 수 있음 -->
+    <BuildRootDirectory Condition="'$(SolutionDir)' != ''">$(SolutionDir)build\</BuildRootDirectory>
+    <BuildRootDirectory Condition="'$(SolutionDir)' == ''">$(MSBuildProjectDirectory)\..\build\</BuildRootDirectory>
+    <PerProjectName>$(MSBuildProjectName)</PerProjectName>
+    <PerProjectBuildRoot>$(BuildRootDirectory)$(PerProjectName)\</PerProjectBuildRoot>
+    <BaseOutputPath>$(PerProjectBuildRoot)</BaseOutputPath>
+    <BaseIntermediateOutputPath>$(PerProjectBuildRoot)obj\</BaseIntermediateOutputPath>
+  </PropertyGroup>
+</Project>

@@ -79,12 +79,12 @@ public class Builder : JobManager
 
                     var startVerseNumber = (mainChapter.Number == query.StartChapterNumber) ? query.StartVerseNumber : 1;
                     var endVerseNumber = (mainChapter.Number == query.EndChapterNumber) ? query.EndVerseNumber : null;
+                    var bookKey = mainChapter.Book?.Key;
 
                     var targetEachVerses = _zippedBibleService.GetVersesAsync(targetEachChapter, token)
                         .Where(eachVerse => eachVerse.Any(verse =>
-                            (endVerseNumber == null)
-                            ? (verse.Number >= startVerseNumber)
-                            : (verse.Number >= startVerseNumber) && (verse.Number <= endVerseNumber)
+                            verse is not null &&
+                            MergedVerses.VerseInRange(verse.Number, startVerseNumber, endVerseNumber, bookKey, mainChapter.Number)
                         ));
                     await channel.Writer.WriteAsync((targetEachVerses, mainBook, mainChapter, startVerseNumber, endVerseNumber), token).ConfigureAwait(false);
                 }

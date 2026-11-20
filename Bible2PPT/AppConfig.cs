@@ -9,9 +9,22 @@ namespace Bible2PPT
         public const int ConfigSize = 1 + 4 + 16 + (16 * 9) + 4 + (4 * 9) + 4;
         public static string ConfigPath { get; } = $"{Application.ExecutablePath}.cfg";
         public static string TemplatePath { get; } = $"{Application.ExecutablePath}.pptx";
-        public static string DatabaseWorkingDirectory { get; } = $"{Path.GetDirectoryName(Application.ExecutablePath)}{Path.DirectorySeparatorChar}";
-        public static string DatabasePath { get; } = $"{Application.ExecutablePath}.edb";
-        public static string ContactUrl { get; } = "https://github.com/sunghwan2789/Bible2PPT";
+
+        public static string ContactUrl { get; } = "https://github.com/metalsky/Bible2PPT";
+
+        /// <summary>
+        /// 사용자 데이터 폴더 (%APPDATA%\Bible2PPT).
+        /// 성경/구절 DB 등 사용자 데이터를 영구적으로 저장하는 위치.
+        /// </summary>
+        public static string UserDataPath
+        {
+            get
+            {
+                return Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                    "Bible2PPT");
+            }
+        }
 
         public static AppConfig Context { get; } = new AppConfig();
 

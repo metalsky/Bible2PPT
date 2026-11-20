@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Configuration;
+using System.IO;
 using System.Text;
 using System.Windows.Forms;
 using Bible2PPT.PPT;
@@ -32,14 +33,38 @@ namespace Bible2PPT
         {
             var services = new ServiceCollection();
 
+            // ===== DB는 사용자 폴더에 영구 저장 (2026-11) =====
+            // 앱 폴더(빌드/설치 위치)가 바뀌어도 사용자의 구절 DB는 유지된다.
+            string exeDbDir = Path.GetDirectoryName(Application.ExecutablePath)
+                               + Path.DirectorySeparatorChar;
+            string userDataDir = AppConfig.UserDataPath;
+            Directory.CreateDirectory(userDataDir);
+
+            // 1회 이관: exe 폴더에 있는 DB(예: 이전 버전/직접 실행 시 생성분)가
+            //     사용자 폴더에 없으면 복사한다. 존재하면 사용자 폴더 쪽을 우선.
+            foreach (string dbFile in new[] { "bible-v3.db", "bindex-v3.db", "build-v3.db" })
+            {
+                foreach (string suffix in new[] { string.Empty, "-wal", "-shm" })
+                {
+                    string src = Path.Combine(exeDbDir, dbFile + suffix);
+                    string dst = Path.Combine(userDataDir, dbFile + suffix);
+                    if (File.Exists(src) && !File.Exists(dst))
+                    {
+                        File.Copy(src, dst, overwrite: false);
+                    }
+                }
+            }
+
             services.AddTransient<SplashForm>();
             services.AddTransient<MainForm>();
-            services.AddBibleIndexService(options => options.UseSqlite("Data Source=bindex-v3.db"));
+            services.AddBibleIndexService(options =>
+                options.UseSqlite($"Data Source={Path.Combine(userDataDir, "bindex-v3.db")}"));
             services.AddBibleService(
                 dbContextOptionsAction: options =>
-                    options.UseSqlite(ConfigurationManager.ConnectionStrings["BibleContext"].ConnectionString));
+                    options.UseSqlite($"Data Source={Path.Combine(userDataDir, "bible-v3.db")}"));
             services.AddBuildService(
-                dbContextOptionsAction: options => options.UseSqlite("Data Source=build-v3.db"),
+                dbContextOptionsAction: options =>
+                    options.UseSqlite($"Data Source={Path.Combine(userDataDir, "build-v3.db")}"),
                 interopInitializeErrorAction: ex =>
                 {
                     MessageBox.Show(

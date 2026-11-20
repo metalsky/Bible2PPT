@@ -1,9 +1,37 @@
+## [2.1.1](https://github.com/metalsky/Bible2PPT/releases/tag/v2.1.1) (2026-11-21)
+
+### Bug Fixes
+
+* **합쳐진 구절 PPT 생성 누락 수정** — 개역개정(4판)에서 2~3개의 절이 하나의 `dataSec="18-19"` range로 제공됨.
+  기존에는 range의 **첫 번호**(18)로만 저장되어, 요청 범위가 range 내부에 있는 절(예: `신6:19`, `시92:2-3`)을
+  요청하면 해당 구절이 PPT에 **누락**(빈 슬라이드/생성 실패)되었음.
+  - 신규 **`MergedVerses`** 정적 클래스(`Bible2PPT.Services.BibleService`)로 range(첫 번호~마지막 번호)를
+    단일 출처로 관리 (`신6:18-19` 등 11개 장).
+  - PPT 빌드 구절 필터(`Builder.cs`)에 `MergedVerses.VerseInRange` 적용: 요청 범위가 range에
+    오버플랩하면 합쳐진 구절 포함 + **null 구절(NRE)** 방어.
+  - `BibleService.IsMergedVerseChapter`도 동일 클래스로 통합 (캐시 갱신 로직 유지).
+  - **단위 테스트 25개** 추가(`MergedVersesTests`), 전체 테스트 **58/58 통과**.
+* UI 글자 잘림/깨짐 재스캔 및 **중복 코드 일관화**(`UiText` static class 통합).
+
+### Verification
+
+* 빌드: `dotnet build Bible2PPT.sln -c Release` → 오류 0
+* 테스트: `dotnet test` → **58/58 통과**
+* godpia: 실제 사이트에서 합쳐진 구절 11개 장 확인(range 값·대소문자) + 파싱 검증
+* 릴리스 실행 파일: `build/Bible2PPT/Release/net8.0-windows/Bible2PPT.exe` (Office interop 포함)
+
 ## [2.1.0](https://github.com/metalsky/Bible2PPT/compare/v2.0.4...v2.1.0) (2026-11-20)
 
 ### New Features
 
 * 갓피아 성경 검색 보완 — 신규 도메인(`https://www.godpia.com`) + 엔드포인트 교체,
   합쳐진 구절(`dataSec="18-19"` range) 파싱 보강
+* 갓피아 파싱 로직을 **static 파서**로 분리하고 **HTTP 재시도/백오프**
+  (최대 3회, 지수적 백오프 1초/2초, `HttpClient` 타임아웃 30초, 재시도 초과 시
+  `WebException` → 기존 UI 재시도 다이얼로그 유지) 도입
+* 갓피아 파싱 **단위 테스트**(`Bible2PPT.Services.BibleService.Tests`, HTML 픽처 기반 10개) 추가
+* **빌드 산출물 `build/` 폴더 분리** (`Directory.Build.props`): 전체 `bin/`/`obj/`를
+  루트 `build/<프로젝트명>/`으로 일괄 이동 (소스 폴더와 산출물 분리, git 관리 용이)
 * 설정 메뉴 **다크/라이트 테마** 선택 (달/해 아이콘)
 * 설정 메뉴 **생성 PPT 파일(최근 2건)·DB 파일명/크기/리비전/저장시간/템플릿 정보** 표시
 * **DB 편집기** (좌측 메뉴 DB 아이콘) — 번역/책/장/절 트리 탐색, 구절 편집,
